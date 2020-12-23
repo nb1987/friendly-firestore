@@ -1,7 +1,7 @@
 const translateRequest = require('../translate-request');
 const Query = require('../query');
 
-test('it adapts a simple document get', () => {
+test('it translates a simple document get', () => {
     const query = (new Query('cities')).doc('Seoul');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -11,7 +11,7 @@ test('it adapts a simple document get', () => {
     });
 });
 
-test('it adapts a simple fetch of a sub-collection\'s documents', () => {
+test('it translates a simple fetch of a sub-collection\'s documents', () => {
     const query = (new Query('cities')).doc('Seoul').collection('districts');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -21,7 +21,7 @@ test('it adapts a simple fetch of a sub-collection\'s documents', () => {
     });
 });
 
-test('it adapts a simple fetch of a sub-collection\'s individual document', () => {
+test('it translates a simple fetch of a sub-collection\'s individual document', () => {
     const query = (new Query('cities')).doc('Seoul').collection('districts').doc('Gangnam-gu');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -31,7 +31,7 @@ test('it adapts a simple fetch of a sub-collection\'s individual document', () =
     });
 });
 
-test('it adapts a request containing a where clause with a single condition', () => {
+test('it translates a request containing a where clause with a single condition', () => {
     const query = (new Query('cities')).where('name', '==', 'Chicago');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -58,7 +58,7 @@ test('it adapts a request containing a where clause with a single condition', ()
     });
 });
 
-test('it adapts a request containing a where clause with multiple conditions', () => {
+test('it translates a request containing a where clause with multiple conditions', () => {
     const query = (new Query('cities')).where('country', '==', 'South Korea').where('population', '>=', 1000000);
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -103,7 +103,7 @@ test('it adapts a request containing a where clause with multiple conditions', (
     });
 });
 
-test('it adapts a request querying a sub-collection and containing a where clause with a single condition', () => {
+test('it translates a request querying a sub-collection and containing a where clause with a single condition', () => {
     const query = (new Query('cities')).doc('Seoul').collection('districts').where('name', '==', 'Gangnam-gu');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -130,7 +130,7 @@ test('it adapts a request querying a sub-collection and containing a where claus
     });
 });
 
-test('it adapts a request containing a (default ascending) orderBy clause', () => {
+test('it translates a request containing a (default ascending) orderBy clause', () => {
     const query = (new Query('cities')).orderBy('population');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -154,7 +154,7 @@ test('it adapts a request containing a (default ascending) orderBy clause', () =
     });
 });
 
-test('it adapts a request containing a descending orderBy clause', () => {
+test('it translates a request containing a descending orderBy clause', () => {
     const query = (new Query('cities')).orderBy('population', 'desc');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -178,7 +178,7 @@ test('it adapts a request containing a descending orderBy clause', () => {
     });
 });
 
-test('it adapts a request containing multiple orderBy clause', () => {
+test('it translates a request containing multiple orderBy clause', () => {
     const query = (new Query('cities')).orderBy('population', 'desc').orderBy('name');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
