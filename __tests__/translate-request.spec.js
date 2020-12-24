@@ -178,7 +178,7 @@ test('it translates a request containing a descending orderBy clause', () => {
     });
 });
 
-test('it translates a request containing multiple orderBy clause', () => {
+test('it translates a request containing multiple orderBy clauses', () => {
     const query = (new Query('cities')).orderBy('population', 'desc').orderBy('name');
     const translatedQuery = translateRequest(query);
     expect(translatedQuery).toEqual({
@@ -207,3 +207,206 @@ test('it translates a request containing multiple orderBy clause', () => {
         }
     });
 });
+
+test('it translates a request containing a limit clause', () => {
+    const query = (new Query('cities')).orderBy('population', 'desc').limit(5);
+    const translatedQuery = translateRequest(query);
+    expect(translatedQuery).toEqual({
+        method: 'post',
+        uri: '/documents:runQuery',
+        body: {
+            structuredQuery: {
+                from: [
+                    {collectionId: 'cities'}
+                ],
+                orderBy: [
+                    {
+                        field: {
+                            fieldPath: 'population'
+                        },
+                        direction: 'DESCENDING'
+                    }
+                ],
+                limit: 5
+            }
+        }
+    });
+});
+
+// TODO: Look into https://github.com/googleapis/nodejs-firestore/issues/59#issuecomment-342619570
+
+test('it translates a request containing a startAt clause', () => {
+    const query = (new Query('cities')).orderBy('population', 'desc').startAt(100000);
+    const translatedQuery = translateRequest(query);
+    expect(translatedQuery).toEqual({
+        method: 'post',
+        uri: '/documents:runQuery',
+        body: {
+            structuredQuery: {
+                from: [
+                    {collectionId: 'cities'}
+                ],
+                orderBy: [
+                    {
+                        field: {
+                            fieldPath: 'population'
+                        },
+                        direction: 'DESCENDING'
+                    }
+                ],
+                startAt: {
+                    values: [
+                        {doubleValue: 100000}
+                    ],
+                    before: true
+                }
+            }
+        }
+    });
+});
+
+test('it translates a request containing a startAfter clause', () => {
+    const query = (new Query('cities')).orderBy('population', 'desc').startAfter(100000);
+    const translatedQuery = translateRequest(query);
+    expect(translatedQuery).toEqual({
+        method: 'post',
+        uri: '/documents:runQuery',
+        body: {
+            structuredQuery: {
+                from: [
+                    {collectionId: 'cities'}
+                ],
+                orderBy: [
+                    {
+                        field: {
+                            fieldPath: 'population'
+                        },
+                        direction: 'DESCENDING'
+                    }
+                ],
+                startAt: {
+                    values: [
+                        {doubleValue: 100000}
+                    ],
+                    before: false
+                }
+            }
+        }
+    });
+});
+
+test('it translates a request containing multiple startAt clauses', () => {
+    const query = (new Query('cities')).orderBy('name').orderBy('state').startAt('Springfield', 'Missouri');
+    const translatedQuery = translateRequest(query);
+    expect(translatedQuery).toEqual({
+        method: 'post',
+        uri: '/documents:runQuery',
+        body: {
+            structuredQuery: {
+                from: [
+                    {collectionId: 'cities'}
+                ],
+                orderBy: [
+                    {
+                        field: {
+                            fieldPath: 'name'
+                        },
+                        direction: 'ASCENDING'
+                    },
+                    {
+                        field: {
+                            fieldPath: 'state'
+                        },
+                        direction: 'ASCENDING'
+                    }
+                ],
+                startAt: {
+                    values: [
+                        {stringValue: 'Springfield'},
+                        {stringValue: 'Missouri'}
+                    ],
+                    before: true
+                }
+            }
+        }
+    });
+});
+
+test('it translates a request containing an endAt clause', () => {
+    const query = (new Query('cities')).orderBy('population', 'desc').endAt(100000);
+    const translatedQuery = translateRequest(query);
+    expect(translatedQuery).toEqual({
+        method: 'post',
+        uri: '/documents:runQuery',
+        body: {
+            structuredQuery: {
+                from: [
+                    {collectionId: 'cities'}
+                ],
+                orderBy: [
+                    {
+                        field: {
+                            fieldPath: 'population'
+                        },
+                        direction: 'DESCENDING'
+                    }
+                ],
+                endAt: {
+                    values: [
+                        {doubleValue: 100000}
+                    ],
+                    before: false
+                }
+            }
+        }
+    });
+});
+
+test('it translates a request containing an endBefore clause', () => {
+    const query = (new Query('cities')).orderBy('population', 'desc').endBefore(100000);
+    const translatedQuery = translateRequest(query);
+    expect(translatedQuery).toEqual({
+        method: 'post',
+        uri: '/documents:runQuery',
+        body: {
+            structuredQuery: {
+                from: [
+                    {collectionId: 'cities'}
+                ],
+                orderBy: [
+                    {
+                        field: {
+                            fieldPath: 'population'
+                        },
+                        direction: 'DESCENDING'
+                    }
+                ],
+                endAt: {
+                    values: [
+                        {doubleValue: 100000}
+                    ],
+                    before: true
+                }
+            }
+        }
+    });
+});
+
+test('it translates a request containing an offset clause', () => {
+    const query = (new Query('cities')).limit(10).offset(20);
+    const translatedQuery = translateRequest(query);
+    expect(translatedQuery).toEqual({
+        method: 'post',
+        uri: '/documents:runQuery',
+        body: {
+            structuredQuery: {
+                from: [
+                    {collectionId: 'cities'}
+                ],
+                limit: 10,
+                offset: 20
+            }
+        }
+    });
+});
+

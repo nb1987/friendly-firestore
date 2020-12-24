@@ -21,9 +21,13 @@ class Query {
         return this;
     }
 
+    select() {
+        this._select = Array.from(arguments);
+        return this;
+    }
+
     where(field, operator, value) {
-        this.path = this.path.concat({
-            type: 'where',
+        this._where = (this._where || []).concat({
             field: field,
             operator: operator,
             value: value
@@ -32,11 +36,52 @@ class Query {
     }
 
     orderBy(field, direction) {
-        this.path = this.path.concat({
-            type: 'orderBy',
+        this._orderBy = (this._orderBy || []).concat({
             field: field,
             direction: direction === 'desc' ? 'DESCENDING' : 'ASCENDING'
         });
+        return this;
+    }
+
+    limit(num) {
+        this._limit = num;
+        return this;
+    }
+    
+    offset(num) {
+        this._offset = num;
+        return this;
+    }
+
+    startAt() {
+        this._startAt = {
+            values: Array.from(arguments),
+            before: true
+        };
+        return this;
+    }
+    
+    startAfter() {
+        this._startAt = {
+            values: Array.from(arguments),
+            before: false
+        };
+        return this;
+    }
+
+    endAt() {
+        this._endAt = {
+            values: Array.from(arguments),
+            before: false
+        };
+        return this;
+    }
+    
+    endBefore() {
+        this._endAt = {
+            values: Array.from(arguments),
+            before: true
+        };
         return this;
     }
 

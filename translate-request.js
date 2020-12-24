@@ -25,7 +25,7 @@ function getValueType(value) {
 }
 
 function extractMethod(query) {
-    return query.path.some(x => ['where', 'orderBy', 'startAt', 'endAt', 'offset', 'limit'].indexOf(x.type) >= 0) ? 'post' : 'get'
+    return ['where', 'orderBy', 'startAt', 'endAt', 'offset', 'limit'].some(prop => query.hasOwnProperty('_' + prop)) ? 'post' : 'get'
 }
 
 function extractUri(query) {
@@ -43,9 +43,6 @@ function extractUri(query) {
 }
 
 function extractBody(query) {
-    const whereClauses = query.path.filter(x => x.type === 'where')
-    const orderByClauses = query.path.filter(x => x.type === 'orderBy')
-
     const body = {
             structuredQuery: {
             from: [
@@ -55,37 +52,47 @@ function extractBody(query) {
         }
     };
 
-    if (whereClauses.length > 1) {
-        body.structuredQuery.where = {
-            compositeFilter: {
-                op: 'AND',
-                filters: whereClauses.map(clause => {
-                    return {
-                        fieldFilter: {
-                            field: {
-                                fieldPath: clause.field
-                            },
-                            op: OPERATOR_MAP[clause.operator],
-                            value: getValueType(clause.value)
-                        }
-                    };
-                })
-            }
-        };
-    } else if (whereClauses.length > 0) {
-        body.structuredQuery.where = {
-            fieldFilter: {
-                field: {
-                    fieldPath: whereClauses[0].field
-                },
-                op: OPERATOR_MAP[whereClauses[0].operator],
-                value: getValueType(whereClauses[0].value)
-            }
+    if (query._select) {
+        body.structuredQuery.select =  { 
+            fields: query._select.map(field => {
+                return {fieldPath: field};
+            })
         };
     }
 
-    if (orderByClauses.length > 0) {
-        body.structuredQuery.orderBy = orderByClauses.map(clause => {
+    if (query._where) {
+        if (query._where.length > 1) {
+            body.structuredQuery.where = {
+                compositeFilter: {
+                    op: 'AND',
+                    filters: query._where.map(clause => {
+                        return {
+                            fieldFilter: {
+                                field: {
+                                    fieldPath: clause.field
+                                },
+                                op: OPERATOR_MAP[clause.operator],
+                                value: getValueType(clause.value)
+                            }
+                        };
+                    })
+                }
+            };
+        } else {
+            body.structuredQuery.where = {
+                fieldFilter: {
+                    field: {
+                        fieldPath: query._where[0].field
+                    },
+                    op: OPERATOR_MAP[query._where[0].operator],
+                    value: getValueType(query._where[0].value)
+                }
+            };
+        }
+    }
+
+    if (query._orderBy) {
+        body.structuredQuery.orderBy = query._orderBy.map(clause => {
             return {
                 field: {
                     fieldPath: clause.field
@@ -93,6 +100,21 @@ function extractBody(query) {
                 direction: clause.direction
             }
         })
+    }
+
+    if (query._limit) body.structuredQuery.limit = query._limit;
+    if (query._offset) body.structuredQuery.offset = query._offset;
+    if (query._startAt) {
+        body.structuredQuery.startAt = {
+            values: query._startAt.values.map(v => getValueType(v)),
+            before: query._startAt.before
+        };
+    }
+    if (query._endAt) {
+        body.structuredQuery.endAt = {
+            values: query._endAt.values.map(v => getValueType(v)),
+            before: query._endAt.before
+        };
     }
 
     return body;
